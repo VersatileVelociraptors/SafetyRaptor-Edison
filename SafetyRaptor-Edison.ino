@@ -8,6 +8,7 @@
 #include <Servo.h>
 #include <SPI.h>
 #include <WiFi.h>
+#include <WiFiUdp.h>
 
 #define LEFT_SERVO 6
 #define RIGHT_SERVO 9
@@ -27,7 +28,7 @@ IPAddress server(172, 25, 75, 108); // numeric IP (no DNS)
 // Initialize the Ethernet client library
 // with the IP address and port of the server
 // that you want to connect to (port 80 is default for HTTP):
-WiFiClient client;
+WiFiUDP client;
 
 Servo left_drive;
 Servo right_drive;
@@ -67,12 +68,19 @@ void setup() {
   printWifiStatus();
 
   Serial.println("\nStarting connection to server...");
+  
   // if you get a connection, report back via serial:
-  if (client.connect(server, 2585)) {
-    Serial.println("connected to server");
-    // Make request:
-    client.println("118");
-  }
+  client.begin(2587);
+
+  do {
+    client.beginPacket(server, 2587);
+    client.write(118);
+    client.endPacket();
+    client.flush();
+    client.parsePacket();
+  } while (!client.available());
+  
+  Serial.println("connected to server");
 
   left_drive.attach(LEFT_SERVO);// initialize servo
   right_drive.attach(RIGHT_SERVO);// initialize second servo
@@ -82,11 +90,15 @@ void setup() {
 
 /// run frequently as long as the board is on
 void loop() {
+  client.parsePacket();
   // if there are incoming bytes available
   // from the server, read them and print them:
-  char input = client.read();
+  byte input = 0;
+  if (client.available()){
+    input = client.read();
+  }
   Serial.println(input);
-  if (input == 'L') {
+  if (input == 1) {
     // left turn
     if (!left_drive.attached()){
       left_drive.attach(LEFT_SERVO);
@@ -98,7 +110,7 @@ void loop() {
     right_drive.write(-180);
     left_tilt.detach();
     right_tilt.detach();
-  } else if (input == 'R') {
+  } else if (input == 2) {
     // right turn
     if (!left_drive.attached()){
       left_drive.attach(LEFT_SERVO);
@@ -110,7 +122,7 @@ void loop() {
     right_drive.write(180);
     left_tilt.detach();
     right_tilt.detach();
-  } else if (input == 'F') {
+  } else if (input == 3) {
     // forward
     if (!left_drive.attached()){
       left_drive.attach(LEFT_SERVO);
@@ -122,7 +134,7 @@ void loop() {
     right_drive.write(-180);
     left_tilt.detach();
     right_tilt.detach();
-  } else if (input == 'B') {
+  } else if (input == 4) {
     // backward
     if (!left_drive.attached()){
       left_drive.attach(LEFT_SERVO);
@@ -134,7 +146,7 @@ void loop() {
     right_drive.write(180);
     left_tilt.detach();
     right_tilt.detach();
-  } else if (input == 'U') {
+  } else if (input == 5) {
     if (!left_tilt.attached()){
       left_tilt.attach(LEFT_TILT_SERVO);
     }
@@ -145,7 +157,7 @@ void loop() {
     right_tilt.write(-180);
     left_drive.detach();
     right_drive.detach();
-  } else if (input == 'D') {
+  } else if (input == 6) {
     if (!left_tilt.attached()){
       left_tilt.attach(LEFT_TILT_SERVO);
     }
@@ -156,7 +168,7 @@ void loop() {
     right_tilt.write(180);
     left_drive.detach();
     right_drive.detach();
-  } else if (input == 'S') {
+  } else if (input == 7 || input == 0) {
     // stop motors
     left_drive.detach();
     right_drive.detach();
@@ -164,7 +176,7 @@ void loop() {
     right_tilt.detach();
   }
 
-  delay(100);
+  delay(5);
 
   if (analogRead(FLAME_SENSOR) > 900) {
     Serial.println("ROBOT ON FIRE! RUN AWAY!");
