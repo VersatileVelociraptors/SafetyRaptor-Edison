@@ -34,6 +34,7 @@ Servo right_drive;
 Servo left_tilt;
 Servo right_tilt;
 
+/// run once before loop
 void setup() {
   //Initialize serial and wait for port to open:
   Serial.begin(9600);
@@ -79,55 +80,78 @@ void setup() {
   right_tilt.attach(RIGHT_TILT_SERVO);
 }
 
+/// run frequently as long as the board is on
 void loop() {
-  // reattach servos
-  if (!left_drive.attached()){
-    left_drive.attach(LEFT_SERVO);
-  }
-  if (!right_drive.attached()){
-    right_drive.attach(RIGHT_SERVO);
-  }
-  if (!left_tilt.attached()){
-    left_tilt.attach(LEFT_TILT_SERVO);
-  }
-  if (!right_tilt.attached()){
-    right_tilt.attach(RIGHT_TILT_SERVO);
-  }
-  
   // if there are incoming bytes available
   // from the server, read them and print them:
   char input = client.read();
   Serial.println(input);
   if (input == 'L') {
     // left turn
+    if (!left_drive.attached()){
+      left_drive.attach(LEFT_SERVO);
+    }
+    if (!right_drive.attached()){
+      right_drive.attach(RIGHT_SERVO);
+    }
     left_drive.write(-180);
     right_drive.write(-180);
     left_tilt.detach();
     right_tilt.detach();
   } else if (input == 'R') {
     // right turn
+    if (!left_drive.attached()){
+      left_drive.attach(LEFT_SERVO);
+    }
+    if (!right_drive.attached()){
+      right_drive.attach(RIGHT_SERVO);
+    }
     left_drive.write(180);
     right_drive.write(180);
     left_tilt.detach();
     right_tilt.detach();
   } else if (input == 'F') {
     // forward
+    if (!left_drive.attached()){
+      left_drive.attach(LEFT_SERVO);
+    }
+    if (!right_drive.attached()){
+      right_drive.attach(RIGHT_SERVO);
+    }
     left_drive.write(180);
     right_drive.write(-180);
     left_tilt.detach();
     right_tilt.detach();
   } else if (input == 'B') {
     // backward
+    if (!left_drive.attached()){
+      left_drive.attach(LEFT_SERVO);
+    }
+    if (!right_drive.attached()){
+      right_drive.attach(RIGHT_SERVO);
+    }
     left_drive.write(-180);
     right_drive.write(180);
     left_tilt.detach();
     right_tilt.detach();
   } else if (input == 'U') {
+    if (!left_tilt.attached()){
+      left_tilt.attach(LEFT_TILT_SERVO);
+    }
+    if (!right_tilt.attached()){
+      right_tilt.attach(RIGHT_TILT_SERVO);
+    }
     left_tilt.write(180);
     right_tilt.write(-180);
     left_drive.detach();
     right_drive.detach();
   } else if (input == 'D') {
+    if (!left_tilt.attached()){
+      left_tilt.attach(LEFT_TILT_SERVO);
+    }
+    if (!right_tilt.attached()){
+      right_tilt.attach(RIGHT_TILT_SERVO);
+    }
     left_tilt.write(-180);
     right_tilt.write(180);
     left_drive.detach();
@@ -147,7 +171,7 @@ void loop() {
   }
 }
 
-
+/// print the status of wireless connection to serial
 void printWifiStatus() {
   // print the SSID of the network you're attached to:
   Serial.print("SSID: ");
