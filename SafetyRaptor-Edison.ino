@@ -9,6 +9,10 @@
 #include <SPI.h>
 #include <WiFi.h>
 
+#define LEFT_SERVO 9
+#define RIGHT_SERVO 10
+#define FLAME_SENSOR A0
+
 char ssid[] = "UHWireless"; //  your network SSID (name) 
 
 int status = WL_IDLE_STATUS;
@@ -22,8 +26,9 @@ IPAddress server(172,25,75,108);  // numeric IP (no DNS)
 // with the IP address and port of the server 
 // that you want to connect to (port 80 is default for HTTP):
 WiFiClient client;
-Servo servo;
-int pos = 0;
+
+Servo left_drive;
+Servo right_drive;
 
 void setup() {
   //Initialize serial and wait for port to open:
@@ -50,10 +55,8 @@ void setup() {
     // Connect to open network   
     status = WiFi.begin(ssid);
   
-    // wait 30 seconds for connection:
-    delay(30000);
-
-    servo.attach(9);// initialize servo on pin 9
+    // wait 10 seconds for connection:
+    delay(10 * 1000);
   } 
   Serial.println("Connected to wifi");
   printWifiStatus();
@@ -65,16 +68,27 @@ void setup() {
     // Make a HTTP request:
     client.println("118");
   }
+
+  left_drive.attach(LEFT_SERVO);// initialize servo on pin 9
+  right_drive.attach(RIGHT_SERVO);// initialize second servo on pin 10
 }
 
 void loop() {
   // if there are incoming bytes available 
   // from the server, read them and print them:
-  while (client.available()) {
+  while (true) {
     byte input = client.read();
-    Serial.write(input);
-    servo.write(input);
+    Serial.println((int)input);
+    left_drive.write(input);
+    delay(15);
+    input = client.read();
+    Serial.println((int)input);
+    right_drive.write(input);
     delay(500);
+
+    if(analogRead(FLAME_SENSOR) > 700) {
+      Serial.println("ROBOT ON FIRE! RUN AWAY!");
+    }
   }
 
   // if the server's disconnected, stop the client:
@@ -106,8 +120,4 @@ void printWifiStatus() {
   Serial.print(rssi);
   Serial.println(" dBm");
 }
-
-
-
-
 
