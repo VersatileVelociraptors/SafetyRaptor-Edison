@@ -9,8 +9,10 @@
 #include <SPI.h>
 #include <WiFi.h>
 
-#define LEFT_SERVO 9
-#define RIGHT_SERVO 10
+#define LEFT_SERVO 6
+#define RIGHT_SERVO 9
+#define LEFT_TILT_SERVO 5
+#define RIGHT_TILT_SERVO 3
 #define FLAME_SENSOR A0
 
 char ssid[] = "UHWireless"; //  your network SSID (name)
@@ -29,6 +31,8 @@ WiFiClient client;
 
 Servo left_drive;
 Servo right_drive;
+Servo left_tilt;
+Servo right_tilt;
 
 void setup() {
   //Initialize serial and wait for port to open:
@@ -69,11 +73,27 @@ void setup() {
     client.println("118");
   }
 
-  left_drive.attach(LEFT_SERVO);// initialize servo on pin 9
-  right_drive.attach(RIGHT_SERVO);// initialize second servo on pin 10
+  left_drive.attach(LEFT_SERVO);// initialize servo
+  right_drive.attach(RIGHT_SERVO);// initialize second servo
+  left_tilt.attach(LEFT_TILT_SERVO);
+  right_tilt.attach(RIGHT_TILT_SERVO);
 }
 
 void loop() {
+  // reattach servos
+  if (!left_drive.attached()){
+    left_drive.attach(LEFT_SERVO);
+  }
+  if (!right_drive.attached()){
+    right_drive.attach(RIGHT_SERVO);
+  }
+  if (!left_tilt.attached()){
+    left_tilt.attach(LEFT_TILT_SERVO);
+  }
+  if (!right_tilt.attached()){
+    right_tilt.attach(RIGHT_TILT_SERVO);
+  }
+  
   // if there are incoming bytes available
   // from the server, read them and print them:
   char input = client.read();
@@ -82,23 +102,47 @@ void loop() {
     // left turn
     left_drive.write(-180);
     right_drive.write(-180);
+    left_tilt.detach();
+    right_tilt.detach();
   } else if (input == 'R') {
     // right turn
     left_drive.write(180);
     right_drive.write(180);
+    left_tilt.detach();
+    right_tilt.detach();
   } else if (input == 'F') {
     // forward
     left_drive.write(180);
     right_drive.write(-180);
+    left_tilt.detach();
+    right_tilt.detach();
   } else if (input == 'B') {
     // backward
     left_drive.write(-180);
     right_drive.write(180);
+    left_tilt.detach();
+    right_tilt.detach();
+  } else if (input == 'U') {
+    left_tilt.write(180);
+    right_tilt.write(-180);
+    left_drive.detach();
+    right_drive.detach();
+  } else if (input == 'D') {
+    left_tilt.write(-180);
+    right_tilt.write(180);
+    left_drive.detach();
+    right_drive.detach();
+  } else if (input == 'S') {
+    // stop motors
+    left_drive.detach();
+    right_drive.detach();
+    left_tilt.detach();
+    right_tilt.detach();
   }
 
-  delay(500);
+  delay(100);
 
-  if (analogRead(FLAME_SENSOR) > 700) {
+  if (analogRead(FLAME_SENSOR) > 900) {
     Serial.println("ROBOT ON FIRE! RUN AWAY!");
   }
 }
