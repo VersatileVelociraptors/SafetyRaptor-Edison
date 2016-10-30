@@ -93,12 +93,12 @@ void loop() {
   client.parsePacket();
   // if there are incoming bytes available
   // from the server, read them and print them:
-  byte input = 0;
+  byte input[1];
   if (client.available()){
-    input = client.read();
+    client.read(input, 1);
   }
-  Serial.println(input);
-  if (input == 1) {
+  Serial.println(input[0], DEC);
+  if (input[0] == 1) {
     // left turn
     if (!left_drive.attached()){
       left_drive.attach(LEFT_SERVO);
@@ -110,7 +110,7 @@ void loop() {
     right_drive.write(-180);
     left_tilt.detach();
     right_tilt.detach();
-  } else if (input == 2) {
+  } else if (input[0] == 2) {
     // right turn
     if (!left_drive.attached()){
       left_drive.attach(LEFT_SERVO);
@@ -122,7 +122,7 @@ void loop() {
     right_drive.write(180);
     left_tilt.detach();
     right_tilt.detach();
-  } else if (input == 3) {
+  } else if (input[0] == 3) {
     // forward
     if (!left_drive.attached()){
       left_drive.attach(LEFT_SERVO);
@@ -134,7 +134,7 @@ void loop() {
     right_drive.write(-180);
     left_tilt.detach();
     right_tilt.detach();
-  } else if (input == 4) {
+  } else if (input[0] == 4) {
     // backward
     if (!left_drive.attached()){
       left_drive.attach(LEFT_SERVO);
@@ -146,7 +146,7 @@ void loop() {
     right_drive.write(180);
     left_tilt.detach();
     right_tilt.detach();
-  } else if (input == 5) {
+  } else if (input[0] == 5) {
     if (!left_tilt.attached()){
       left_tilt.attach(LEFT_TILT_SERVO);
     }
@@ -157,7 +157,7 @@ void loop() {
     right_tilt.write(-180);
     left_drive.detach();
     right_drive.detach();
-  } else if (input == 6) {
+  } else if (input[0] == 6) {
     if (!left_tilt.attached()){
       left_tilt.attach(LEFT_TILT_SERVO);
     }
@@ -168,7 +168,7 @@ void loop() {
     right_tilt.write(180);
     left_drive.detach();
     right_drive.detach();
-  } else if (input == 7 || input == 0) {
+  } else if (input[0] == 7 || input[0] == NULL) {
     // stop motors
     left_drive.detach();
     right_drive.detach();
